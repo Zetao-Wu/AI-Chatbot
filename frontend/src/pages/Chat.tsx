@@ -1,7 +1,39 @@
 import React from "react";
-import { Avatar, Box, Button, Typography } from "@mui/material";
+import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
 import { red } from "@mui/material/colors";
+import ChatItem from "../components/chat/ChatItem";
+import { IoMdSend } from "react-icons/io";
+
+// Define the message type
+type ChatMessage = {
+  role: "user" | "assistant"; // Explicitly type role
+  content: string;
+};
+
+// Explicitly type the chatMessages array
+const chatMessages: ChatMessage[] = [
+  { role: "user", content: "Hey, could you give me today's weather update?" },
+  {
+    role: "assistant",
+    content: "Of course! Could you let me know your current location?",
+  },
+  { role: "user", content: "I’m in Los Angeles." },
+  {
+    role: "assistant",
+    content: "Got it! Give me a second to check the weather for Los Angeles.",
+  },
+  {
+    role: "assistant",
+    content:
+      "The forecast for today in Los Angeles is partly cloudy with a high of 80°F.",
+  },
+  { role: "user", content: "Awesome, that's exactly what I needed. Thanks!" },
+  {
+    role: "assistant",
+    content: "You're very welcome! Let me know if you need anything else.",
+  },
+];
 
 const Chat = () => {
   const auth = useAuth();
@@ -100,10 +132,42 @@ const Chat = () => {
             flexDirection: "column",
             overflow: "scroll",
             overflowX: "hidden",
-            overflowY: 'auto',
+            overflowY: "auto",
             scrollBehavior: "smooth",
           }}
-        ></Box>
+        >
+          {chatMessages.map((chat, index) => (
+            <div key={index}>
+              <ChatItem content={chat.content} role={chat.role} />
+            </div>
+          ))}
+        </Box>
+        <div
+          style={{
+            width: "100%",
+            padding: "20px",
+            borderRadius: 8,
+            backgroundColor: "rgb(17,27,39)",
+            display: "flex",
+            margin: "auto",
+          }}
+        >
+          <input
+            type="text"
+            style={{
+              width: "100%",
+              backgroundColor: "transparent",
+              padding: "10px",
+              border: "none",
+              outline: "none",
+              color: "white",
+              fontSize: "20px",
+            }}
+          />
+          <IconButton sx={{ ml: "auto", color: "white" }}>
+            <IoMdSend />
+          </IconButton>
+        </div>
       </Box>
     </Box>
   );
