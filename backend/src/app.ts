@@ -20,3 +20,4 @@ app.use('/api/v1', appRouter)
 export default app;
 
 // change localhost in userController for the domain for cookie (in constants)
+// change axios default with main.tsx of frotend
