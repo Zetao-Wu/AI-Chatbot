@@ -5,7 +5,12 @@ import { red } from "@mui/material/colors";
 import ChatItem from "../components/chat/ChatItem";
 import { IoMdSend } from "react-icons/io";
 import { useRef } from "react";
-import { getUserChats, sendChatRequest } from "../helpers/api-communicator";
+import { useNavigate } from "react-router-dom";
+import {
+  deleteUserChats,
+  getUserChats,
+  sendChatRequest,
+} from "../helpers/api-communicator";
 import { toast } from "react-hot-toast";
 
 // Define the message type
@@ -14,37 +19,54 @@ type ChatMessage = {
   content: string;
 };
 
-
-
 const Chat = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const auth = useAuth();
+  const navigate = useNavigate();
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const handleSubmit = async () => {
     const content = inputRef.current?.value as string;
     if (inputRef && inputRef.current) {
-      inputRef.current.value = '';
+      inputRef.current.value = "";
     }
-    const newMessage: ChatMessage = {role: 'user', content};
+    const newMessage: ChatMessage = { role: "user", content };
     setChatMessages((prev) => [...prev, newMessage]);
     const chatData = await sendChatRequest(content);
     setChatMessages([...chatData.chats]);
-  }
+  };
 
   useEffect(() => {
     if (auth?.isLoggedIn && auth.user) {
-      toast.loading("Loading Chats", {id: "loadchats"});
+      toast.loading("Loading Chats", { id: "loadchats" });
       getUserChats()
         .then((data) => {
           setChatMessages([...data.chats]);
-          toast.success("Successfully loaded chats", {id: "loadchats"});
+          toast.success("Successfully loaded chats", { id: "loadchats" });
         })
         .catch((err) => {
           console.log(err);
-          toast.error("Loading Failed", {id: "loadchats"});
+          toast.error("Loading Failed", { id: "loadchats" });
         });
     }
   }, [auth]);
+
+  const handleDeleteChats = async () => {
+    try {
+      toast.loading("Deletign Chats", { id: "deletechats" });
+      await deleteUserChats();
+      setChatMessages([]);
+      toast.success("Deleted Chats Successfully", { id: "deletechats" });
+    } catch (error) {
+      console.log(error);
+      toast.error("Deleted Chats failed", { id: "deletechats" });
+    }
+  };
+
+  useEffect(() => {
+    if(!auth?.user) {
+      return navigate("/login");
+    }
+  }, [auth])
   return (
     <Box
       sx={{
@@ -94,6 +116,7 @@ const Chat = () => {
             personal information and/or harmful questions.
           </Typography>
           <Button
+          onClick={handleDeleteChats}
             sx={{
               width: "200px",
               my: "auto",
@@ -173,7 +196,10 @@ const Chat = () => {
               fontSize: "20px",
             }}
           />
-          <IconButton onClick={handleSubmit} sx={{ ml: "auto", color: "white" }}>
+          <IconButton
+            onClick={handleSubmit}
+            sx={{ ml: "auto", color: "white" }}
+          >
             <IoMdSend />
           </IconButton>
         </div>
