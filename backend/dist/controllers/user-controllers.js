@@ -53,22 +53,26 @@ export const userLogin = async (req, res, next) => {
     try {
         //user login
         const { email, password } = req.body;
+        console.log("Login attempt with email:", email); // Check login attempt
         const user = await User.findOne({ email });
         if (!user) {
+            console.log("User not found in the database");
             return res.status(401).send("User not registered");
         }
         const isPasswordCorrect = await compare(password, user.password);
         if (!isPasswordCorrect) {
+            console.log("Password incorrect for user:", email);
             return res.status(403).send("Incorrect Password");
         }
         // create token and store cookie
+        const token = createToken(user._id.toString(), user.email, "7d");
+        console.log("Generated token for user:", token); // Debugging: log token generation
         res.clearCookie(COOKIE_NAME, {
             httpOnly: true,
             domain: "localhost",
             signed: true,
             path: "/",
         });
-        const token = createToken(user._id.toString(), user.email, "7d");
         const expires = new Date();
         expires.setDate(expires.getDate() + 7);
         res.cookie(COOKIE_NAME, token, {
@@ -78,12 +82,13 @@ export const userLogin = async (req, res, next) => {
             httpOnly: true,
             signed: true,
         });
+        console.log("Cookie set with token for user:", email); // Debugging: log cookie set
         return res
             .status(200)
             .json({ message: "OK", name: user.name, email: user.email });
     }
     catch (error) {
-        console.log(error);
+        console.log("Error during login process:", error);
         return res.status(200).json({ message: "ERROR", cause: error.message });
     }
 };
