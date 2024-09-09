@@ -10,8 +10,10 @@ config();
 const app = express();
 
 //middlwares
-app.use(cors({origin: "https://ai-chatbot-frontend-xyae.onrender.com", credentials: true}))
-app.use(express.json());
+app.use(cors({
+    origin: "https://ai-chatbot-frontend-xyae.onrender.com", // Use the correct origin without the trailing slash
+    credentials: true,  // Allow cookies and credentials
+  }));app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 //remove it in product
