@@ -62,12 +62,6 @@ export const userLogin = async (req, res, next) => {
             return res.status(403).send("Incorrect Password");
         }
         // create token and store cookie
-        res.clearCookie(COOKIE_NAME, {
-            httpOnly: true,
-            domain: "localhost",
-            signed: true,
-            path: "/",
-        });
         const token = createToken(user._id.toString(), user.email, "7d");
         const expires = new Date();
         expires.setDate(expires.getDate() + 7);
