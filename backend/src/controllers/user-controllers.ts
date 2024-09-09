@@ -68,8 +68,9 @@ export const userLogin = async (
 ) => {
   try {
     //user login
+
     const { email, password } = req.body;
-    
+      console.log("Cookies on login request:", req.signedCookies);  // <-- Add this line
     console.log("Login attempt with email:", email); // Check login attempt
     
     const user = await User.findOne({ email });
