@@ -50,7 +50,11 @@ export const userSignup = async (
       expires,
       httpOnly: true,
       signed: true,
+      secure: true,        // Ensures cookie is sent over HTTPS
+      sameSite: "none",    // Required for cross-site cookies
     });
+
+    console.log("Cookie set during signup:", token); // Log for debugging
 
     return res
       .status(201)
@@ -68,9 +72,9 @@ export const userLogin = async (
 ) => {
   try {
     //user login
-
     const { email, password } = req.body;
-      console.log("Cookies on login request:", req.signedCookies);  // <-- Add this line
+
+    console.log("Cookies on login request:", req.signedCookies);  // <-- Debugging: Log cookies on request
     console.log("Login attempt with email:", email); // Check login attempt
     
     const user = await User.findOne({ email });
@@ -92,7 +96,7 @@ export const userLogin = async (
 
     res.clearCookie(COOKIE_NAME, {
       httpOnly: true,
-      domain: "ai-chatbot-frontend-xyae.onrender.com",
+      domain: DOMAIN,
       signed: true,
       path: "/",
       secure: true,
@@ -103,7 +107,7 @@ export const userLogin = async (
 
     res.cookie(COOKIE_NAME, token, {
       path: "/",
-      domain: "ai-chatbot-frontend-xyae.onrender.com",
+      domain: DOMAIN,
       expires,
       httpOnly: true,
       signed: true,
@@ -166,7 +170,11 @@ export const userLogout = async (
       domain: DOMAIN,
       signed: true,
       path: "/",
+      secure: true,
+      sameSite: "none",    // Cross-site cookie setup
     });
+
+    console.log("User logged out and cookie cleared for:", user.email); // Debugging: log logout action
 
     return res
       .status(200)

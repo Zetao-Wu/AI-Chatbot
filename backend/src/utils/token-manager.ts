@@ -7,10 +7,18 @@ export const createToken = (id: string, email: string, expiresIn: string) => {
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn,
   });
+
+  console.log("Token created for user:", email, "Token:", token); // Debugging: log token creation
   return token;
 };
 
-export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
+export const verifyToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("Cookies present on the request:", req.signedCookies); // Debugging: log cookies on request
+  
   const token = req.signedCookies[COOKIE_NAME];
 
   if (!token || token.trim() === "") {
@@ -21,12 +29,14 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
   try {
     // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded token:", decoded); // Debugging log
+    
+    console.log("Token successfully decoded:", decoded); // Debugging: log decoded token
     res.locals.jwtData = decoded; // Store decoded data in res.locals
-    console.log("Cookies on request:", req.signedCookies);
+    
+    console.log("User authenticated successfully, proceeding to next middleware."); // Debugging log
     return next(); // Proceed to the next middleware
   } catch (err) {
-    console.error("Token verification failed:", err); // Debugging log
+    console.error("Token verification failed:", err.message); // Debugging log for token verification failure
     return res.status(401).json({ message: "Token Expired or Invalid" });
   }
 };

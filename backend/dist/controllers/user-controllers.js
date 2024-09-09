@@ -39,7 +39,10 @@ export const userSignup = async (req, res, next) => {
             expires,
             httpOnly: true,
             signed: true,
+            secure: true, // Ensures cookie is sent over HTTPS
+            sameSite: "none", // Required for cross-site cookies
         });
+        console.log("Cookie set during signup:", token); // Log for debugging
         return res
             .status(201)
             .json({ message: "OK", name: user.name, email: user.email });
@@ -53,7 +56,7 @@ export const userLogin = async (req, res, next) => {
     try {
         //user login
         const { email, password } = req.body;
-        console.log("Cookies on login request:", req.signedCookies); // <-- Add this line
+        console.log("Cookies on login request:", req.signedCookies); // <-- Debugging: Log cookies on request
         console.log("Login attempt with email:", email); // Check login attempt
         const user = await User.findOne({ email });
         if (!user) {
@@ -70,7 +73,7 @@ export const userLogin = async (req, res, next) => {
         console.log("Generated token for user:", token); // Debugging: log token generation
         res.clearCookie(COOKIE_NAME, {
             httpOnly: true,
-            domain: "ai-chatbot-frontend-xyae.onrender.com",
+            domain: DOMAIN,
             signed: true,
             path: "/",
             secure: true,
@@ -80,7 +83,7 @@ export const userLogin = async (req, res, next) => {
         expires.setDate(expires.getDate() + 7);
         res.cookie(COOKIE_NAME, token, {
             path: "/",
-            domain: "ai-chatbot-frontend-xyae.onrender.com",
+            domain: DOMAIN,
             expires,
             httpOnly: true,
             signed: true,
@@ -131,7 +134,10 @@ export const userLogout = async (req, res, next) => {
             domain: DOMAIN,
             signed: true,
             path: "/",
+            secure: true,
+            sameSite: "none", // Cross-site cookie setup
         });
+        console.log("User logged out and cookie cleared for:", user.email); // Debugging: log logout action
         return res
             .status(200)
             .json({ message: "OK", name: user.name, email: user.email });
