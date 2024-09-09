@@ -2,11 +2,13 @@ import User from "../models/User.js";
 import { configureOpenAI } from "../config/openai-config.js";
 import { OpenAIApi } from "openai";
 export const generateChatCompletion = async (req, res, next) => {
-    const { message, userId } = req.body; // Assume you are sending the userId directly from the client (or remove user logic if not needed)
+    const { message } = req.body;
     try {
-        const user = await User.findById(userId); // Use userId from request body instead of res.locals.jwtData
+        const user = await User.findById(res.locals.jwtData.id);
         if (!user)
-            return res.status(401).json({ message: "User not registered" });
+            return res
+                .status(401)
+                .json({ message: "User not registered OR Token malfunctioned" });
         // grab chats of user
         const chats = user.chats.map(({ role, content }) => ({
             role,
@@ -14,7 +16,7 @@ export const generateChatCompletion = async (req, res, next) => {
         }));
         chats.push({ content: message, role: "user" });
         user.chats.push({ content: message, role: "user" });
-        // send all chats with new one to OpenAI API
+        // send all chats with new one to openAI API
         const config = configureOpenAI();
         const openai = new OpenAIApi(config);
         // get latest response
@@ -32,34 +34,40 @@ export const generateChatCompletion = async (req, res, next) => {
     }
 };
 export const sendChatsToUser = async (req, res, next) => {
-    const { userId } = req.body; // Assume you send userId from client or remove user-specific logic
     try {
-        const user = await User.findById(userId);
+        //user token check
+        const user = await User.findById(res.locals.jwtData.id);
         if (!user) {
-            return res.status(401).send("User not registered");
+            return res.status(401).send("User not registered OR Token malfunctioned");
+        }
+        if (user._id.toString() !== res.locals.jwtData.id) {
+            return res.status(401).send("Permissions didn't match");
         }
         return res.status(200).json({ message: "OK", chats: user.chats });
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({ message: "ERROR", cause: error.message });
+        return res.status(200).json({ message: "ERROR", cause: error.message });
     }
 };
 export const deleteChats = async (req, res, next) => {
-    const { userId } = req.body; // Again, assume userId is sent from client
     try {
-        const user = await User.findById(userId);
+        //user token check
+        const user = await User.findById(res.locals.jwtData.id);
         if (!user) {
-            return res.status(401).send("User not registered");
+            return res.status(401).send("User not registered OR Token malfunctioned");
+        }
+        if (user._id.toString() !== res.locals.jwtData.id) {
+            return res.status(401).send("Permissions didn't match");
         }
         //@ts-ignore
-        user.chats = []; // Clear all chats
+        user.chats = [];
         await user.save();
         return res.status(200).json({ message: "OK" });
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({ message: "ERROR", cause: error.message });
+        return res.status(200).json({ message: "ERROR", cause: error.message });
     }
 };
 //# sourceMappingURL=chat-controllers.js.map

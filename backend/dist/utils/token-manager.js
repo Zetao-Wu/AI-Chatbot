@@ -7,21 +7,23 @@ export const createToken = (id, email, expiresIn) => {
     });
     return token;
 };
-export const verifyToken = (req, res, next) => {
-    const token = req.signedCookies[COOKIE_NAME]; // Get the signed cookie
+export const verifyToken = async (req, res, next) => {
+    const token = req.signedCookies[`${COOKIE_NAME}`];
     if (!token || token.trim() === "") {
         return res.status(401).json({ message: "Token Not Received" });
     }
-    try {
-        // Verify the token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        res.locals.jwtData = decoded; // Save decoded token data (user info) to res.locals
-        next(); // Move to the next middleware or route handler
-    }
-    catch (err) {
-        // Token is invalid or expired
-        console.error("Token verification failed:", err);
-        return res.status(401).json({ message: "Token Expired or Invalid" });
-    }
+    return new Promise((resolve, reject) => {
+        return jwt.verify(token, process.env.JWT_SECRET, (err, success) => {
+            if (err) {
+                reject(err.message);
+                return res.status(401).json({ message: "Token Expired" });
+            }
+            else {
+                resolve();
+                res.locals.jwtData = success;
+                return next();
+            }
+        });
+    });
 };
 //# sourceMappingURL=token-manager.js.map
