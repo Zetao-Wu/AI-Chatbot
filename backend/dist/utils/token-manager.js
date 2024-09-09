@@ -18,6 +18,7 @@ export const verifyToken = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log("Decoded token:", decoded); // Debugging log
         res.locals.jwtData = decoded; // Store decoded data in res.locals
+        console.log("Cookies on request:", req.signedCookies);
         return next(); // Proceed to the next middleware
     }
     catch (err) {

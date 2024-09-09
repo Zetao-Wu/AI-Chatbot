@@ -69,18 +69,22 @@ export const userLogin = async (req, res, next) => {
         console.log("Generated token for user:", token); // Debugging: log token generation
         res.clearCookie(COOKIE_NAME, {
             httpOnly: true,
-            domain: DOMAIN,
+            domain: "ai-chatbot-frontend-xyae.onrender.com",
             signed: true,
             path: "/",
+            secure: true,
+            sameSite: "none",
         });
         const expires = new Date();
         expires.setDate(expires.getDate() + 7);
         res.cookie(COOKIE_NAME, token, {
             path: "/",
-            domain: DOMAIN,
+            domain: "ai-chatbot-frontend-xyae.onrender.com",
             expires,
             httpOnly: true,
             signed: true,
+            secure: true, // Ensures cookie is sent over HTTPS
+            sameSite: "none", // Required for cross-site cookies
         });
         console.log("Cookie set with token for user:", email); // Debugging: log cookie set
         return res
