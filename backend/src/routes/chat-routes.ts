@@ -6,8 +6,8 @@ import { deleteChats, generateChatCompletion, sendChatsToUser } from "../control
 //Protected API
 const chatRoutes = Router();
 chatRoutes.post("/new", validate(chatCompletionValidation), verifyToken, generateChatCompletion);
-chatRoutes.get("/all-chats", verifyToken, sendChatsToUser);
-chatRoutes.delete("/delete", verifyToken, deleteChats);
+chatRoutes.get("/all-chats",sendChatsToUser);
+chatRoutes.delete("/delete", deleteChats);
 
 
 export default chatRoutes;
